@@ -5,6 +5,7 @@ import (
 
 	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/dto"
 	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/entity"
+	"github.com/tanveerprottoy/basic-go-server/pkg/config"
 	"github.com/tanveerprottoy/basic-go-server/pkg/data/sqlxpkg"
 	"github.com/tanveerprottoy/basic-go-server/pkg/errorpkg"
 	"github.com/tanveerprottoy/basic-go-server/pkg/response"
@@ -23,6 +24,12 @@ func NewService(r sqlxpkg.Repository[entity.Resource]) *Service {
 
 func (s *Service) readOneInternal(id string, w http.ResponseWriter) (entity.Resource, error) {
 	return s.repository.ReadOne(id)
+}
+
+func (s *Service) GetBasicData(w http.ResponseWriter, r *http.Request) {
+	m := make(map[string]any)
+	m["message"] = config.GetEnvValue("MESSAGE")
+	response.Respond(http.StatusOK, response.BuildData(m), w)
 }
 
 func (s *Service) Create(d *dto.CreateUpdateResourceDto, w http.ResponseWriter, r *http.Request) {

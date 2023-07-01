@@ -35,18 +35,18 @@ func (d *Client) init() {
 	var err error
 	d.DB, err = sqlx.Open("postgres", info)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
 	// ping is necessary to create connection
 	err = d.DB.Ping()
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
 	log.Println("Successfully connected!")
 	// create table if not exists
-	_, err = d.DB.Exec("CREATE TABLE IF NOT EXISTS books (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title VARCHAR NOT NULL, author VARCHAR NOT NULL, publication_year INT, created_at BIGINT, updated_at BIGINT)")
+	_, err = d.DB.Exec("CREATE TABLE IF NOT EXISTS resources (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title VARCHAR NOT NULL, author VARCHAR NOT NULL, publication_year INT, created_at BIGINT, updated_at BIGINT)")
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
 
 }

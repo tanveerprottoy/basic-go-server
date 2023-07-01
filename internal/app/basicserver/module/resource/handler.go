@@ -43,6 +43,10 @@ func (h *Handler) parseValidateRequestBody(r *http.Request) (dto.CreateUpdateRes
 	return d, err
 }
 
+func (h *Handler) GetBasicData(w http.ResponseWriter, r *http.Request) {
+	h.service.GetBasicData(w, r)
+}
+
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	d, err := h.parseValidateRequestBody(r)
 	if err != nil {

@@ -1,4 +1,4 @@
-package app
+package basicserver
 
 import (
 	"crypto/tls"
@@ -43,23 +43,6 @@ func (a *App) initValidators() {
 	a.Validate = validator.New()
 	_ = a.Validate.RegisterValidation("notempty", validatorpkg.NotEmpty)
 }
-
-/* func (a *App) initLogger() {
-	cfg := zap.NewProductionConfig()
-	cfg.OutputPaths = []string{
-		"proxy.log",
-	}
-	cfg.Build()
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	task := "taskName"
-	logger.Info("failed to do task",
-		// Structured context as strongly typed Field values.
-		zap.String("url", task),
-		zap.Int("attempt", 3),
-		zap.Duration("backoff", time.Second),
-	)
-} */
 
 // Init app
 func (a *App) initComponents() {
