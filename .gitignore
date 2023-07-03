@@ -42,5 +42,6 @@ bin/
 log/
 *.log
 
-# temp
-tmp/
+# env
+.env
+

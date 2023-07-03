@@ -1,14 +1,15 @@
 package resource
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/dto"
 	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/entity"
+	"github.com/tanveerprottoy/basic-go-server/internal/pkg/constant"
 	"github.com/tanveerprottoy/basic-go-server/pkg/config"
 	"github.com/tanveerprottoy/basic-go-server/pkg/data/sqlxpkg"
 	"github.com/tanveerprottoy/basic-go-server/pkg/errorpkg"
-	"github.com/tanveerprottoy/basic-go-server/pkg/response"
 	"github.com/tanveerprottoy/basic-go-server/pkg/timepkg"
 )
 
@@ -22,17 +23,17 @@ func NewService(r sqlxpkg.Repository[entity.Resource]) *Service {
 	return s
 }
 
-func (s *Service) readOneInternal(id string, w http.ResponseWriter) (entity.Resource, error) {
+func (s Service) readOneInternal(id string) (entity.Resource, error) {
 	return s.repository.ReadOne(id)
 }
 
-func (s *Service) GetBasicData(w http.ResponseWriter, r *http.Request) {
+func (s Service) GetBasicData(ctx *context.Context) map[string]any {
 	m := make(map[string]any)
 	m["message"] = config.GetEnvValue("MESSAGE")
-	response.Respond(http.StatusOK, response.BuildData(m), w)
+	return m
 }
 
-func (s *Service) Create(d *dto.CreateUpdateResourceDto, w http.ResponseWriter, r *http.Request) {
+func (s Service) Create(d *dto.CreateUpdateResourceDto, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
 	// convert dto to entity
 	b := entity.Resource{}
 	b.Name = d.Name
@@ -41,69 +42,61 @@ func (s *Service) Create(d *dto.CreateUpdateResourceDto, w http.ResponseWriter, 
 	b.UpdatedAt = n
 	err := s.repository.Create(&b)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return b, errorpkg.HandleDBError(err)
 	}
-	response.Respond(http.StatusCreated, response.BuildData(d), w)
+	return b, nil
 }
 
-func (s *Service) ReadMany(limit, page int, w http.ResponseWriter, r *http.Request) {
+func (s Service) ReadMany(limit, page int, ctx *context.Context) (map[string]any, *errorpkg.HTTPError) {
+	m := make(map[string]any)
+	m["items"] = make([]entity.Resource, 0)
+	m["limit"] = limit
+	m["page"] = page
 	offset := limit * (page - 1)
 	d, err := s.repository.ReadMany(limit, offset)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return m, errorpkg.HandleDBError(err)
 	}
-	m := make(map[string]any)
 	m["items"] = d
-	m["limit"] = limit
-	m["page"] = page
-	response.Respond(http.StatusOK, response.BuildData(m), w)
+	return m, nil
 }
 
-func (s *Service) ReadOne(id string, w http.ResponseWriter, r *http.Request) {
-	b, err := s.readOneInternal(id, w)
+func (s Service) ReadOne(id string, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+	b, err := s.readOneInternal(id)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return b, errorpkg.HandleDBError(err)
 	}
-	response.Respond(http.StatusOK, response.BuildData(b), w)
+	return b, nil
 }
 
-func (s *Service) Update(id string, d *dto.CreateUpdateResourceDto, w http.ResponseWriter, r *http.Request) {
-	b, err := s.readOneInternal(id, w)
+func (s Service) Update(id string, d *dto.CreateUpdateResourceDto, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+	b, err := s.readOneInternal(id)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return b, errorpkg.HandleDBError(err)
 	}
 	b.Name = d.Name
 	b.UpdatedAt = timepkg.NowUnixMilli()
 	rows, err := s.repository.Update(id, &b)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return b, errorpkg.HandleDBError(err)
 	}
 	if rows > 0 {
-		response.Respond(http.StatusOK, response.BuildData(b), w)
-		return
+		return b, nil
 	}
-	response.RespondError(http.StatusBadRequest, errorpkg.NewError("operation was not successful"), w)
+	return b, &errorpkg.HTTPError{Code: http.StatusBadRequest, Err: errorpkg.NewError(constant.OperationNotSuccess)}
 }
 
-func (s *Service) Delete(id string, w http.ResponseWriter, r *http.Request) {
-	b, err := s.readOneInternal(id, w)
+func (s Service) Delete(id string, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+	b, err := s.readOneInternal(id)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return b, errorpkg.HandleDBError(err)
 	}
 	rows, err := s.repository.Delete(id)
 	if err != nil {
-		errorpkg.HandleDBError(err, w)
-		return
+		return b, errorpkg.HandleDBError(err)
 	}
 	if rows > 0 {
-		response.Respond(http.StatusOK, response.BuildData(b), w)
-		return
+		return b, nil
 	}
-	response.RespondError(http.StatusBadRequest, errorpkg.NewError("operation was not successful"), w)
+	return b, &errorpkg.HTTPError{Code: http.StatusBadRequest, Err: errorpkg.NewError(constant.OperationNotSuccess)}
 }

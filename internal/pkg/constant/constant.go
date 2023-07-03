@@ -7,10 +7,13 @@ const ResourcesPattern = "/resources"
 
 // db
 const RowsAffected = "rowsAffected"
+
+// misc
 const InternalServerError = "internal server error"
 const NotFound = "not found"
 const BadRequest = "bad request"
 const Error = "error"
+const OperationNotSuccess = "operation was not successful"
 
 // keys
 const KeyId = "id"

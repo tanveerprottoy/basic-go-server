@@ -14,6 +14,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// Hanlder is responsible for extracting data
+// from request body and building and seding response
 type Handler struct {
 	service  *Service
 	validate *validator.Validate
@@ -44,7 +46,9 @@ func (h *Handler) parseValidateRequestBody(r *http.Request) (dto.CreateUpdateRes
 }
 
 func (h *Handler) GetBasicData(w http.ResponseWriter, r *http.Request) {
-	h.service.GetBasicData(w, r)
+	ctx := r.Context()
+	m := h.service.GetBasicData(&ctx)
+	response.Respond(http.StatusOK, response.BuildData(m), w)
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +57,13 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		response.RespondError(http.StatusBadRequest, err, w)
 		return
 	}
-	h.service.Create(&d, w, r)
+	ctx := r.Context()
+	e, httpErr := h.service.Create(&d, &ctx)
+	if httpErr != nil {
+		response.RespondError(httpErr.Code, httpErr.Err, w)
+		return
+	}
+	response.Respond(http.StatusCreated, e, w)
 }
 
 func (h *Handler) ReadMany(w http.ResponseWriter, r *http.Request) {
@@ -76,12 +86,20 @@ func (h *Handler) ReadMany(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	h.service.ReadMany(limit, page, w, r)
+	e, httpErr := h.service.ReadMany(limit, page, nil)
+	if httpErr != nil {
+		response.RespondError(httpErr.Code, httpErr.Err, w)
+	}
+	response.Respond(http.StatusOK, e, w)
 }
 
 func (h *Handler) ReadOne(w http.ResponseWriter, r *http.Request) {
 	id := httppkg.GetURLParam(r, constant.KeyId)
-	h.service.ReadOne(id, w, r)
+	e, httpErr := h.service.ReadOne(id, nil)
+	if httpErr != nil {
+		response.RespondError(httpErr.Code, httpErr.Err, w)
+	}
+	response.Respond(http.StatusOK, e, w)
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
@@ -91,10 +109,18 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		response.RespondError(http.StatusBadRequest, err, w)
 		return
 	}
-	h.service.Update(id, &d, w, r)
+	e, httpErr := h.service.Update(id, &d, nil)
+	if httpErr != nil {
+		response.RespondError(httpErr.Code, httpErr.Err, w)
+	}
+	response.Respond(http.StatusOK, e, w)
 }
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := httppkg.GetURLParam(r, constant.KeyId)
-	h.service.Delete(id, w, r)
+	e, httpErr := h.service.Delete(id, nil)
+	if httpErr != nil {
+		response.RespondError(httpErr.Code, httpErr.Err, w)
+	}
+	response.Respond(http.StatusOK, e, w)
 }
