@@ -27,13 +27,13 @@ func (s Service) readOneInternal(id string) (entity.Resource, error) {
 	return s.repository.ReadOne(id)
 }
 
-func (s Service) GetBasicData(ctx *context.Context) map[string]any {
+func (s Service) GetBasicData(ctx context.Context) map[string]any {
 	m := make(map[string]any)
 	m["message"] = config.GetEnvValue("MESSAGE")
 	return m
 }
 
-func (s Service) Create(d *dto.CreateUpdateResourceDto, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) Create(d *dto.CreateUpdateResourceDto, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
 	// convert dto to entity
 	b := entity.Resource{}
 	b.Name = d.Name
@@ -47,7 +47,7 @@ func (s Service) Create(d *dto.CreateUpdateResourceDto, ctx *context.Context) (e
 	return b, nil
 }
 
-func (s Service) ReadMany(limit, page int, ctx *context.Context) (map[string]any, *errorpkg.HTTPError) {
+func (s Service) ReadMany(limit, page int, ctx context.Context) (map[string]any, *errorpkg.HTTPError) {
 	m := make(map[string]any)
 	m["items"] = make([]entity.Resource, 0)
 	m["limit"] = limit
@@ -61,7 +61,7 @@ func (s Service) ReadMany(limit, page int, ctx *context.Context) (map[string]any
 	return m, nil
 }
 
-func (s Service) ReadOne(id string, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) ReadOne(id string, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
 	b, err := s.readOneInternal(id)
 	if err != nil {
 		return b, errorpkg.HandleDBError(err)
@@ -69,7 +69,7 @@ func (s Service) ReadOne(id string, ctx *context.Context) (entity.Resource, *err
 	return b, nil
 }
 
-func (s Service) Update(id string, d *dto.CreateUpdateResourceDto, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) Update(id string, d *dto.CreateUpdateResourceDto, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
 	b, err := s.readOneInternal(id)
 	if err != nil {
 		return b, errorpkg.HandleDBError(err)
@@ -86,7 +86,7 @@ func (s Service) Update(id string, d *dto.CreateUpdateResourceDto, ctx *context.
 	return b, &errorpkg.HTTPError{Code: http.StatusBadRequest, Err: errorpkg.NewError(constant.OperationNotSuccess)}
 }
 
-func (s Service) Delete(id string, ctx *context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) Delete(id string, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
 	b, err := s.readOneInternal(id)
 	if err != nil {
 		return b, errorpkg.HandleDBError(err)

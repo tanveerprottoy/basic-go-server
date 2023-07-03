@@ -47,7 +47,7 @@ func (h *Handler) parseValidateRequestBody(r *http.Request) (dto.CreateUpdateRes
 
 func (h *Handler) GetBasicData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	m := h.service.GetBasicData(&ctx)
+	m := h.service.GetBasicData(ctx)
 	response.Respond(http.StatusOK, response.BuildData(m), w)
 }
 
@@ -58,7 +58,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	e, httpErr := h.service.Create(&d, &ctx)
+	e, httpErr := h.service.Create(&d, ctx)
 	if httpErr != nil {
 		response.RespondError(httpErr.Code, httpErr.Err, w)
 		return
