@@ -1,24 +1,23 @@
-package basicserver
+package server
 
 import (
-	"crypto/tls"
 	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource"
 	"github.com/tanveerprottoy/basic-go-server/internal/pkg/constant"
 	"github.com/tanveerprottoy/basic-go-server/internal/pkg/router"
+	resourcecfg "github.com/tanveerprottoy/basic-go-server/internal/server/resource/config"
 	"github.com/tanveerprottoy/basic-go-server/pkg/data/sqlxpkg"
 	"github.com/tanveerprottoy/basic-go-server/pkg/validatorpkg"
 )
 
 // App struct
 type App struct {
-	DBClient      *sqlxpkg.Client
-	router        *router.Router
-	ResourceModule    *resource.Module
-	Validate      *validator.Validate
+	DBClient    *sqlxpkg.Client
+	router      *router.Router
+	resourceCfg *resourcecfg.Config
+	Validate    *validator.Validate
 }
 
 func NewApp() *App {
@@ -32,11 +31,11 @@ func (a *App) initDB() {
 }
 
 func (a *App) initModules() {
-	a.ResourceModule = resource.NewModule(a.DBClient.DB, a.Validate)
+	a.resourceCfg = resourcecfg.NewConfig(a.DBClient.DB, a.Validate)
 }
 
 func (a *App) initModuleRouters() {
-	router.RegisterUserRoutes(a.router, constant.V1, a.ResourceModule)
+	router.RegisterUserRoutes(a.router, constant.V1, a.resourceCfg.Handler)
 }
 
 func (a *App) initValidators() {
@@ -62,13 +61,4 @@ func (a *App) Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (a *App) RunDisableHTTP2() {
-	srv := &http.Server{
-		Handler:      a.router.Mux,
-		Addr:         "127.0.0.1:8080",
-		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
-	}
-	log.Fatal(srv.ListenAndServe())
 }

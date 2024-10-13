@@ -1,4 +1,4 @@
-package entity
+package resource
 
 type Resource struct {
 	Id        string `db:"id" json:"id"`

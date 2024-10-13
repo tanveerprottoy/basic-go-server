@@ -2,20 +2,20 @@ package router
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource"
 	"github.com/tanveerprottoy/basic-go-server/internal/pkg/constant"
+	"github.com/tanveerprottoy/basic-go-server/internal/server/resource"
 )
 
-func RegisterUserRoutes(router *Router, version string, module *resource.Module) {
+func RegisterUserRoutes(router *Router, version string, handler *resource.Handler) {
 	router.Mux.Route(
 		constant.ApiPattern+version+constant.ResourcesPattern,
 		func(r chi.Router) {
-			r.Get(constant.RootPattern, module.Handler.ReadMany)
-			r.Get(constant.RootPattern+"get-basic", module.Handler.GetBasicData)
-			r.Get(constant.RootPattern+"{id}", module.Handler.ReadOne)
-			r.Post(constant.RootPattern, module.Handler.Create)
-			r.Patch(constant.RootPattern+"{id}", module.Handler.Update)
-			r.Delete(constant.RootPattern+"{id}", module.Handler.Delete)
+			r.Get(constant.RootPattern, handler.ReadMany)
+			r.Get(constant.RootPattern+"get-basic", handler.GetBasicData)
+			r.Get(constant.RootPattern+"{id}", handler.ReadOne)
+			r.Post(constant.RootPattern, handler.Create)
+			r.Patch(constant.RootPattern+"{id}", handler.Update)
+			r.Delete(constant.RootPattern+"{id}", handler.Delete)
 		},
 	)
 }

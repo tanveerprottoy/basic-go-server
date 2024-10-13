@@ -1,4 +1,4 @@
-package dto
+package resource
 
 // CreateUpdateResourceDto dto for create update
 type CreateUpdateResourceDto struct {

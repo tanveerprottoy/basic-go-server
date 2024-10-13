@@ -4,26 +4,23 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/dto"
-	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/entity"
 	"github.com/tanveerprottoy/basic-go-server/internal/pkg/constant"
 	"github.com/tanveerprottoy/basic-go-server/pkg/config"
-	"github.com/tanveerprottoy/basic-go-server/pkg/data/sqlxpkg"
 	"github.com/tanveerprottoy/basic-go-server/pkg/errorpkg"
 	"github.com/tanveerprottoy/basic-go-server/pkg/timepkg"
 )
 
 type Service struct {
-	repository sqlxpkg.Repository[entity.Resource]
+	repository *Repository
 }
 
-func NewService(r sqlxpkg.Repository[entity.Resource]) *Service {
+func NewService(r *Repository) *Service {
 	s := new(Service)
 	s.repository = r
 	return s
 }
 
-func (s Service) readOneInternal(id string) (entity.Resource, error) {
+func (s Service) readOneInternal(id string) (Resource, error) {
 	return s.repository.ReadOne(id)
 }
 
@@ -33,9 +30,9 @@ func (s Service) GetBasicData(ctx context.Context) map[string]any {
 	return m
 }
 
-func (s Service) Create(d *dto.CreateUpdateResourceDto, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) Create(d *CreateUpdateResourceDto, ctx context.Context) (Resource, *errorpkg.HTTPError) {
 	// convert dto to entity
-	b := entity.Resource{}
+	b := Resource{}
 	b.Name = d.Name
 	n := timepkg.NowUnixMilli()
 	b.CreatedAt = n
@@ -49,7 +46,7 @@ func (s Service) Create(d *dto.CreateUpdateResourceDto, ctx context.Context) (en
 
 func (s Service) ReadMany(limit, page int, ctx context.Context) (map[string]any, *errorpkg.HTTPError) {
 	m := make(map[string]any)
-	m["items"] = make([]entity.Resource, 0)
+	m["items"] = make([]Resource, 0)
 	m["limit"] = limit
 	m["page"] = page
 	offset := limit * (page - 1)
@@ -61,7 +58,7 @@ func (s Service) ReadMany(limit, page int, ctx context.Context) (map[string]any,
 	return m, nil
 }
 
-func (s Service) ReadOne(id string, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) ReadOne(id string, ctx context.Context) (Resource, *errorpkg.HTTPError) {
 	b, err := s.readOneInternal(id)
 	if err != nil {
 		return b, errorpkg.HandleDBError(err)
@@ -69,7 +66,7 @@ func (s Service) ReadOne(id string, ctx context.Context) (entity.Resource, *erro
 	return b, nil
 }
 
-func (s Service) Update(id string, d *dto.CreateUpdateResourceDto, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) Update(id string, d *CreateUpdateResourceDto, ctx context.Context) (Resource, *errorpkg.HTTPError) {
 	b, err := s.readOneInternal(id)
 	if err != nil {
 		return b, errorpkg.HandleDBError(err)
@@ -86,7 +83,7 @@ func (s Service) Update(id string, d *dto.CreateUpdateResourceDto, ctx context.C
 	return b, &errorpkg.HTTPError{Code: http.StatusBadRequest, Err: errorpkg.NewError(constant.OperationNotSuccess)}
 }
 
-func (s Service) Delete(id string, ctx context.Context) (entity.Resource, *errorpkg.HTTPError) {
+func (s Service) Delete(id string, ctx context.Context) (Resource, *errorpkg.HTTPError) {
 	b, err := s.readOneInternal(id)
 	if err != nil {
 		return b, errorpkg.HandleDBError(err)

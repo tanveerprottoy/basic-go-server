@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/tanveerprottoy/basic-go-server/internal/app/basicserver/module/resource/dto"
 	"github.com/tanveerprottoy/basic-go-server/internal/pkg/constant"
 	"github.com/tanveerprottoy/basic-go-server/pkg/adapter"
 	"github.com/tanveerprottoy/basic-go-server/pkg/httppkg"
@@ -28,8 +27,8 @@ func NewHandler(s *Service, v *validator.Validate) *Handler {
 	return h
 }
 
-func (h *Handler) parseValidateRequestBody(r *http.Request) (dto.CreateUpdateResourceDto, error) {
-	var d dto.CreateUpdateResourceDto
+func (h *Handler) parseValidateRequestBody(r *http.Request) (CreateUpdateResourceDto, error) {
+	var d CreateUpdateResourceDto
 	err := jsonpkg.Decode(r.Body, &d)
 	if err != nil {
 		return d, err
